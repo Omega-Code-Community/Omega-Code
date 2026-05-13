@@ -24,6 +24,7 @@ on:
 
   # Action 工作流
   workflow_run:
+    workflows: ["*"]
     types: [completed] 
 
 jobs:
