@@ -1,0 +1,38 @@
+name: feishu bot
+
+on:
+  # Issues 事件
+  issues:
+    types: [opened, edited, milestoned, pinned, reopened]
+  issue_comment:
+    types: [created, deleted]
+
+  # PR 事件
+  pull_request:
+    branches: [main, dev]
+    types: [opened, reopened, synchronize, assigned]
+  pull_request_review:
+    types: [edited, dismissed, submitted]
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+
+  # 代码推送 & 发布
+  push:
+    branches: [main, dev]
+  release:
+    types: [published]
+
+  # Action 工作流
+  workflow_run:
+    workflows: ["*"]
+    types: [completed] 
+
+jobs:
+  send-event:
+    name: Webhook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: junka/feishu-bot-webhook-action@main
+        with:
+          webhook: ${{ secrets.FEISHU_BOT_WEBHOOK }}
+          signkey: ${{ secrets.FEISHU_BOT_SIGNKEY }}
