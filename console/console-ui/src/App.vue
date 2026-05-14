@@ -1,6 +1,6 @@
 <script lang="ts">
 export const iframeHeight = "800px"
-export const description = "A dashboard with sidebar, data table, and analytics cards."
+export const description = "A dashboard with sidebar, db table, and analytics cards."
 </script>
 
 <script setup lang="ts">

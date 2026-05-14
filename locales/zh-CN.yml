@@ -1,0 +1,4 @@
+_version: 1
+test_message: "你好，%{name}"
+logger_is_initialized: "日志已经初始化了喵~"
+current_locale: "当前语言: %{locale_name}"

@@ -34,9 +34,9 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       data-slot="select-content"
       v-bind="{ ...$attrs, ...forwarded }"
       :class="cn(
-        'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--reka-select-content-available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border shadow-md',
+        'bg-popover text-popover-foreground db-[state=open]:animate-in db-[state=closed]:animate-out db-[state=closed]:fade-out-0 db-[state=open]:fade-in-0 db-[state=closed]:zoom-out-95 db-[state=open]:zoom-in-95 db-[side=bottom]:slide-in-from-top-2 db-[side=left]:slide-in-from-right-2 db-[side=right]:slide-in-from-left-2 db-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--reka-select-content-available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border shadow-md',
         position === 'popper'
-          && 'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
+          && 'db-[side=bottom]:translate-y-1 db-[side=left]:-translate-x-1 db-[side=right]:translate-x-1 db-[side=top]:-translate-y-1',
         props.class,
       )
       "
