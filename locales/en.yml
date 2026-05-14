@@ -1,0 +1,4 @@
+_version: 1
+test_message: "Hello, %{name}"
+logger_is_initialized: "Logger is initialized."
+current_locale: "Current locale: %{locale_name}"
