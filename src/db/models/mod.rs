@@ -1,1 +1,16 @@
 mod config;
+mod ai_provider;
+mod llm_model;
+mod agent_info;
+mod prompt_info;
+mod prompt_placeholder;
+mod agent_arena;
+mod chat_session;
+mod chat_message;
+mod memory_info;
+mod mcp_provider;
+mod mcp_tool;
+mod agent_mcp_rel;
+mod project_info;
+mod system_api_log;
+mod system_config;
