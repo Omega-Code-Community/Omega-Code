@@ -18,7 +18,7 @@ pub struct App {
 
 impl App {
     /// 运行主循环直到用户退出
-    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> anyhow::Result<()> {
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             self.handle_events()?;
@@ -168,7 +168,7 @@ impl App {
 }
 
 // 标准主函数（极简、规范）
-fn main() -> io::Result<()> {
+fn main() -> anyhow::Result<()> {
     let mut terminal = ratatui::init();
     let mut app = App::default();
     let result = app.run(&mut terminal);

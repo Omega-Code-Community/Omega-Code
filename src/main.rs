@@ -4,23 +4,23 @@ extern crate OmegaCode;
 extern crate log;
 #[macro_use]
 extern crate flexi_logger;
-#[macro_use]
-extern crate rust_i18n;
 
 use flexi_logger::{
     Cleanup, Criterion, Duplicate, FileSpec, Logger, Naming, WriteMode, detailed_format,
 };
-use log::{debug, error, info, trace, warn};
-use rust_i18n::{set_locale, t};
 
-rust_i18n::i18n!("locales");
 fn main() {
-    set_locale("en");
     init_logger();
-    info!("{}", t!("logger_is_initialized"));
-    info!("{}", t!("test_message", name = "OmegaCode"));
-    info!("{}", t!("current_locale", locale_name = "en"));
-    OmegaCode::run();
+    if let Err(e) = OmegaCode::run() {
+        eprintln!("Application error: {}", e);
+        // Print full error chain
+        let mut current = e.source();
+        while let Some(cause) = current {
+            eprintln!("Caused by: {}", cause);
+            current = cause.source();
+        }
+        std::process::exit(1);
+    }
 }
 
 fn init_logger() {
@@ -28,7 +28,7 @@ fn init_logger() {
         .unwrap()
         .log_to_file(
             FileSpec::default()
-                .directory(app_dir!())
+                .directory(app_dir!() + "/logs")
                 .basename("omega")
                 .suffix("log"),
         )
@@ -37,7 +37,7 @@ fn init_logger() {
             Naming::Numbers,
             Cleanup::KeepLogFiles(3),
         )
-        .write_mode(WriteMode::BufferAndFlush)
+        .write_mode(WriteMode::Direct)
         .duplicate_to_stderr(Duplicate::Debug) // Logger level, production env should be Info level
         .format_for_files(detailed_format)
         .start()
