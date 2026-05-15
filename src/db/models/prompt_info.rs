@@ -9,7 +9,8 @@ pub struct PromptInfo {
     pub version: String,
     pub version_desc: String,
     pub tag: String,
+    pub status: i8,// default 1
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub remark: String,
+    pub remark: Option<String>,
 }

@@ -4,10 +4,11 @@ pub struct AgentArena {
     pub chat_uuid: String,
     pub round_uuid: String,
     pub agent_id: i32,
+    pub vote_num: i8,
     pub vote_type: i8,
-    pub comment: String,
+    pub comment: Option<String>,
     pub status: i8,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub remark: String,
+    pub remark: Option<String>,
 }

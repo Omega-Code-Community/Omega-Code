@@ -8,5 +8,5 @@ pub struct SystemAPILog {
     pub status: i8, // 0: success, 1: failed
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub remark: String,
+    pub remark: Option<String>,
 }

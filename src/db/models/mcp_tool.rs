@@ -8,8 +8,8 @@ pub struct MCPTool {
     pub tag: String,
     pub parameters: String,
     pub response_format: String,
-    pub status: i8,
+    pub status: i8,// default 1
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub remark: String,
+    pub remark: Option<String>,
 }
