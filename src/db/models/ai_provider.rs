@@ -4,10 +4,10 @@ pub struct AiProvider {
     pub name: String,
     pub avatar: String,
     pub api: String,
-    pub key: String,
-    pub timeout: i32,
-    pub status: i8,
+    pub key: Option<String>,
+    pub timeout: i32,//ms default 5000
+    pub status: i8,// default 1
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub remark: String,
+    pub remark: Option<String>,
 }

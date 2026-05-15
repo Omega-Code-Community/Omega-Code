@@ -6,12 +6,12 @@ pub struct ChatMessage {
     pub round_uuid: String,
     pub role: PromptRole,
     pub content: String,
-    pub input_tokens: i32,
-    pub output_tokens: i32,
-    pub duration: i32,
+    pub input_tokens: i32, // default 0
+    pub output_tokens: i32,// default 0
+    pub duration: i32,// default 0
     pub model_config: String,
-    pub status: i8,
+    pub status: i8,// default 1
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub remark: String,
+    pub remark: Option<String>,
 }
