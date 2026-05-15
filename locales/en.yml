@@ -2,3 +2,6 @@ _version: 1
 test_message: "Hello, %{name}"
 logger_is_initialized: "Logger is initialized."
 current_locale: "Current locale: %{locale_name}"
+database_path: "Connecting to database at: %{database_path}"
+database_initialized: "Database initialized."
+database_table_create: "Database table %{table_name} is created."
