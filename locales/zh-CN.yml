@@ -5,3 +5,11 @@ current_locale: "当前语言: %{locale_name}"
 database_path: "数据库位置: %{database_path}"
 database_initialized: "数据库初始化成功"
 database_table_create: "数据表 %{table_name} 已创建"
+
+welcome.version: "版本: %{version}"
+welcome.text: "欢迎来到 Omega Code !"
+welcome.menu: "快速菜单(使用 ↑/↓ 键导航，按 enter 选择项):"
+menu_items:
+  - "打开 Omega Code 控制台面板，配置应用程序"
+  - "开始新项目"
+  - "退出"
