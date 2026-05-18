@@ -1,33 +1,81 @@
-use anyhow::Result;
+pub mod detect;
+use anyhow::{anyhow, Result};
+use std::path::PathBuf;
 
-pub fn get_platform_user_dir() -> Result<String> {
+/// 获取用户目录
+pub fn get_platform_user_dir() -> Result<PathBuf> {
     #[cfg(target_os = "windows")]
     let user_dir = std::env::var("USERPROFILE")
-        .map_err(|e| anyhow::anyhow!("Failed to get USERPROFILE environment variable: {}", e))?;
+        .map_err(|e| anyhow!("Failed to get USERPROFILE: {}", e))?;
 
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     let user_dir = std::env::var("HOME")
-        .map_err(|e| anyhow::anyhow!("Failed to get HOME environment variable: {}", e))?;
+        .map_err(|e| anyhow!("Failed to get HOME: {}", e))?;
 
-    #[cfg(target_os = "macos")]
-    let user_dir = std::env::var("HOME")
-        .map_err(|e| anyhow::anyhow!("Failed to get HOME environment variable: {}", e))?;
-
-    Ok(user_dir)
+    Ok(PathBuf::from(user_dir))
 }
 
-pub fn get_platform_app_dir() -> Result<String> {
-    let user_dir = get_platform_user_dir()?;
-    let app_dir = format!("{}/.omega", user_dir);
-    std::fs::create_dir_all(&app_dir)
-        .map_err(|e| anyhow::anyhow!("Failed to create app directory '{}': {}", app_dir, e))?;
+/// 获取系统 temp 目录
+pub fn get_os_temp_dir() -> Result<PathBuf> {
+    #[cfg(target_os = "windows")]
+    {
+        let temp_dir = std::env::var("TEMP")
+            .map_err(|e| anyhow!("Failed to get TEMP: {}", e))?;
+
+        Ok(PathBuf::from(temp_dir))
+    }
+
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    {
+        Ok(PathBuf::from("/tmp"))
+    }
+
+    #[cfg(not(any(
+        target_os = "windows",
+        target_os = "linux",
+        target_os = "macos"
+    )))]
+    {
+        Err(anyhow!("Unsupported operating system"))
+    }
+}
+
+/// 获取应用目录
+pub fn get_platform_app_dir() -> Result<PathBuf> {
+    let app_dir = get_platform_user_dir()?.join(".omega");
+
+    std::fs::create_dir_all(&app_dir).map_err(|e| {
+        anyhow!(
+            "Failed to create app directory '{}': {}",
+            app_dir.display(),
+            e
+        )
+    })?;
+
     Ok(app_dir)
 }
 
-pub fn get_database_path() -> Result<String> {
-    let app_dir = get_platform_app_dir()?;
-    let db_path = format!("{}/omega_code.db", app_dir);
-    Ok(db_path)
+/// 获取 runtime 目录
+pub fn get_app_runtime_dir() -> Result<PathBuf> {
+    let runtime_dir = get_platform_app_dir()?.join("runtime");
+
+    std::fs::create_dir_all(&runtime_dir).map_err(|e| {
+        anyhow!(
+            "Failed to create runtime directory '{}': {}",
+            runtime_dir.display(),
+            e
+        )
+    })?;
+
+    Ok(runtime_dir)
+}
+
+/// 获取数据库路径
+pub fn get_database_path() -> Result<PathBuf> {
+    Ok(
+        get_platform_app_dir()?
+            .join("omega_code.db")
+    )
 }
 
 #[macro_export]
