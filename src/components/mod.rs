@@ -1,3 +1,3 @@
 pub mod welcome;
-pub(crate) mod input_bar;
-mod status_bar;
+pub mod input_bar;
+pub mod status_bar;
