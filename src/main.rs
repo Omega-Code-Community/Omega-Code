@@ -28,7 +28,7 @@ fn init_logger() {
         .unwrap()
         .log_to_file(
             FileSpec::default()
-                .directory(app_dir!() + "/logs")
+                .directory(app_dir!().display().to_string() + "/logs")
                 .basename("omega")
                 .suffix("log"),
         )
