@@ -251,7 +251,7 @@ impl Component for Welcome {
             "██║     ██║   ██║██║  ██║█████╗  ",
             "██║     ██║   ██║██║  ██║██╔══╝  ",
             "╚██████╗╚██████╔╝██████╔╝███████╗",
-            " ╚═════╝ ╚═════╝ ⚫═════╝ ╚══════╝",
+            " ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝",
         ];
 
         let version = self.version.clone().unwrap_or_else(|| env!("CARGO_PKG_VERSION").to_string());
