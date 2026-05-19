@@ -24,7 +24,7 @@ fn main() {
 }
 
 fn init_logger() {
-    let _logger = Logger::try_with_str("trace")
+    let _logger = Logger::try_with_str("OmegaCode=trace,reqwest=warn,hyper=warn")
         .unwrap()
         .log_to_file(
             FileSpec::default()
@@ -38,7 +38,6 @@ fn init_logger() {
             Cleanup::KeepLogFiles(3),
         )
         .write_mode(WriteMode::Direct)
-        .duplicate_to_stderr(Duplicate::Debug) // Logger level, production env should be Info level
         .format_for_files(detailed_format)
         .start()
         .unwrap();
