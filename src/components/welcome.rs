@@ -1,6 +1,6 @@
 use ratatui_kit::{Component, ComponentDrawer, ComponentUpdater, Hooks, Props, UseEvents, UseFuture, UseState};
 
-use ratatui_kit::crossterm::event::{Event, KeyCode};
+use ratatui_kit::crossterm::event::{Event, KeyCode, KeyEventKind};
 
 use ratatui_kit::ratatui::{
     style::{Modifier, Style},
@@ -97,12 +97,15 @@ impl Component for Welcome {
         let mut total = hooks.use_state(|| self.total);
         let mut speed = hooks.use_state(|| self.speed);
 
-        let current_show_menu_for_events = self.jre_ready && self.python_ready;
-
         let mut state_index = hooks.use_state(|| self.selected_index);
         hooks.use_events(move |event| {
             if jre_ready.get() && python_ready.get() {
                 if let Event::Key(key) = event {
+
+                    if key.kind != KeyEventKind::Press {
+                        return;
+                    }
+
                     match key.code {
                         KeyCode::Up => {
                             state_index.set(
