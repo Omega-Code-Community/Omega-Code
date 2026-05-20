@@ -12,11 +12,11 @@ use flexi_logger::{
 fn main() {
     init_logger();
     if let Err(e) = OmegaCode::run() {
-        eprintln!("Application error: {}", e);
+        error!("Application error: {}", e);
         // Print full error chain
         let mut current = e.source();
         while let Some(cause) = current {
-            eprintln!("Caused by: {}", cause);
+            error!("Caused by: {}", cause);
             current = cause.source();
         }
         std::process::exit(1);
