@@ -304,7 +304,7 @@ impl Component for Welcome {
                     let total_mb = self.total as f64 / 1024.0 / 1024.0;
                     let speed_mb = self.speed / 1024.0 / 1024.0;
 
-                    spans.push(Span::raw(format!("  {:.2} MB/{:.2} MB", mb, total_mb)));
+                    spans.push(Span::raw(format!("  ({:.2} MB/{:.2} MB)", mb, total_mb)));
                     spans.push(Span::raw(format!("  {:.2} MB/s", speed_mb)));
                 } else {
                     spans.push(Span::raw(format!("  {} / {}", self.downloaded, self.total)));
