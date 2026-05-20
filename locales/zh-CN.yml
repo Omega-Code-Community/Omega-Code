@@ -1,7 +1,0 @@
-_version: 1
-test_message: "你好，%{name}"
-logger_is_initialized: "日志已经初始化了喵~"
-current_locale: "当前语言: %{locale_name}"
-database_path: "数据库位置: %{database_path}"
-database_initialized: "数据库初始化成功"
-database_table_create: "数据表 %{table_name} 已创建"

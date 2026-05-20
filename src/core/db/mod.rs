@@ -47,12 +47,20 @@ impl DatabaseManager {
         let db_path = get_database_path()?;
 
         let conn = Connection::open(&db_path)
-            .with_context(|| format!("Failed to open database: {}", db_path))?;
+            .with_context(|| {
+                format!(
+                    "Failed to open database: {}",
+                    db_path.display()
+                )
+            })?;
 
         info!(
-            "{}",
-            t!("database_path", database_path = &db_path)
-        );
+    "{}",
+    t!(
+        "database_path",
+        database_path = db_path.display().to_string()
+    )
+);
 
         db_init::init_all_tables(&conn)
             .context("Failed to initialize database")?;
