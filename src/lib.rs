@@ -1,9 +1,8 @@
 #[macro_use]
 extern crate rust_i18n;
 
-use crate::core::db::DatabaseManager;
 use crate::pages::layout::App;
-use log::info;
+use log::{error, info};
 use ratatui_kit::crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui_kit::prelude::RouterProvider;
 use ratatui_kit::{AnyElement, ElementExt, Hooks, UseEvents, UseRouter, component, element};
@@ -31,8 +30,11 @@ pub async fn run() -> anyhow::Result<()> {
     info!("{}", t!("logger_is_initialized"));
     info!("{}", t!("test_message", name = "OmegaCode"));
     info!("{}", t!("current_locale", locale_name = "en"));
-    let db = DatabaseManager::new()?;
-    db.health_check()?;
+
+    if !health_check() {
+        error!("Health check failed");
+        return Err(anyhow::anyhow!("Health check failed"));
+    }
 
     element!(Root)
         .into_any()
@@ -45,13 +47,16 @@ pub async fn run() -> anyhow::Result<()> {
 
 #[component]
 pub fn Root(_hooks: Hooks) -> impl Into<AnyElement<'static>> {
-    // 严格按照官方文档：RouterProvider 放最顶层
     element!(
         RouterProvider(
             routes: app_routes(),
             index_path: "/router",
         )
     )
+}
+
+fn health_check() -> bool {
+    health::network_checker::check_network() && health::db_checker::check_db().unwrap()
 }
 
 
