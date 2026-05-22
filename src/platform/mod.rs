@@ -84,7 +84,7 @@ macro_rules! app_dir {
         match $crate::platform::get_platform_app_dir() {
             Ok(dir) => dir,
             Err(e) => {
-                eprintln!("Failed to get app directory: {}", e);
+                error!("Failed to get app directory: {}", e);
                 std::process::exit(1);
             }
         }
