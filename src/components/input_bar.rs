@@ -44,10 +44,10 @@ pub fn InputBar(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     });
 
     element!(Border(
-        height: Constraint::Length(4),
+        height: Constraint::Length(6),
         style: Style::default().green(),
-        bottom_title: Line::styled(
-            "Press 'Enter' to submit, 'Esc' to exit",
+        top_title: Line::styled(
+            "Composer",
             Style::default().yellow(),
         ).centered(),
     ) {
