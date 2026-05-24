@@ -24,6 +24,8 @@ pub fn RouterPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     });
 
     //todo 这里的逻辑是通过数据库查询是否初始化，从而确定要路由到 Welcome 还是 Chat
+    //todo 为了开发方便，这里的逻辑还需要判断是否是开发环境，如果是开发环境，默认路由到路由页面，路由页面在生产环境不对外暴露
+    //todo 同时路由函数禁止在生成环境中调用，避免在生产环境中路由到路由页面
 
     element!(
         View(height: Constraint::Length(10),) {
