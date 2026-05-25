@@ -16,7 +16,7 @@ anyhow = "1.0.102"
 tokio = { version = "1.52.3", features = ["full"] }
 colored = "3.1.1"
 indicatif = "0.18.4"
-reqwest = { version = "0.13.3", features = ["stream"] }
+reqwest = { version = "0.13.3", features = ["stream", "json"] }
 tokio-stream = "0.1.18"
 futures = "0.3.32"
 futures-util = "0.3.32"
@@ -39,3 +39,5 @@ flate2 = "1.1.9"
 tar = "0.4.46"
 thiserror = "2.0.18"
 hex = "0.4.3"
+dotenv = "0.15.0"
+bytes = "1.11.1"
