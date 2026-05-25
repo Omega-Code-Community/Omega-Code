@@ -70,7 +70,7 @@ pub fn ProgressBar(
                 Some(element! {
                     View {
                         Text(text: props.stage.clone(), style: props.style.add_modifier(Modifier::BOLD)) {}
-                        Text(spans: spans) {}
+                        // Text(spans: spans) {}
                     }
                 })
             } else {
