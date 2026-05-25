@@ -27,6 +27,10 @@ on:
     workflows: ["*"]
     types: [completed] 
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   send-event:
     name: Webhook
