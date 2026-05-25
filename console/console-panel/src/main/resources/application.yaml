@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: omega-console-panel
+  datasource:
+    url: jdbc:sqlite:${user.home}/.omega/omega_code.db
+    driver-class-name: org.sqlite.JDBC
+    type: org.springframework.jdbc.datasource.SimpleDriverDataSource
+  web:
+    resources:
+      static-locations: file:${user.home}/.omega/static/
+  autoconfigure:
+    # 这里暂时排除AI模型配置类，后面业务代码需要时再添加
+    exclude:
+      - org.springframework.ai.model.deepseek.autoconfigure.DeepSeekChatAutoConfiguration
+      - org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
