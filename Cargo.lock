@@ -7,7 +7,6 @@ name = "OmegaCode"
 version = "0.1.0-alpha"
 dependencies = [
  "anyhow",
- "async-trait",
  "bytes",
  "chrono",
  "clap",
@@ -37,7 +36,6 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
- "tracing",
  "zip",
 ]
 

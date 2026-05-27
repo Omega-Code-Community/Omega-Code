@@ -17,8 +17,8 @@ use std::future::Future;
 use std::path::PathBuf;
 use std::pin::Pin;
 use std::time::Duration;
+use log::{info, warn};
 use tokio::fs;
-use tracing::{info, warn};
 
 // ============================================================
 // Retry Config
