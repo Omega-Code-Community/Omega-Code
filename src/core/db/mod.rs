@@ -316,7 +316,7 @@ impl DatabaseManager {
         Ok(result)
     }
 
-    /// config
+    /// update
     pub fn update<T>(&self, model: T) -> Result<usize>
     where
         T: Model,
