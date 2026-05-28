@@ -26,6 +26,7 @@ dependencies = [
  "ratatui 0.30.0",
  "ratatui-kit",
  "reqwest",
+ "retry",
  "rmcp",
  "rusqlite",
  "rust-i18n",
@@ -2588,6 +2589,15 @@ dependencies = [
  "wasm-bindgen-futures",
  "wasm-streams",
  "web-sys",
+]
+
+[[package]]
+name = "retry"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1cab9bd343c737660e523ee69f788018f3db686d537d2fd0f99c9f747c1bda4f"
+dependencies = [
+ "rand 0.9.4",
 ]
 
 [[package]]

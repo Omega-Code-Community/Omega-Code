@@ -6,3 +6,4 @@ pub mod db;
 pub mod agent;
 mod providers;
 mod errors;
+mod client;
