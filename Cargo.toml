@@ -16,7 +16,7 @@ anyhow = "1.0.102"
 tokio = { version = "1.52.3", features = ["full"] }
 colored = "3.1.1"
 indicatif = "0.18.4"
-reqwest = { version = "0.13.3", features = ["stream", "json", "multipart", "query"] }
+reqwest = { version = "0.13.4", features = ["stream", "json", "multipart", "query"] }
 tokio-stream = "0.1.18"
 futures = "0.3.32"
 futures-util = "0.3.32"
