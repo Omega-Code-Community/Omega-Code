@@ -1,5 +1,10 @@
 mod config;
 pub mod base_client;
+pub mod ai_client;
+
+pub use config::ClientConfig;
+pub use base_client::BaseClient;
+pub use ai_client::AiClient;
 
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
@@ -244,10 +249,10 @@ impl RetryMiddleware {
             let (ctx, request) = factory().await?;
 
             info!(
-                method = %ctx.method,
-                url = %ctx.url,
-                attempt,
-                "sending request"
+                "sending request: method={}, url={}, attempt={}",
+                ctx.method,
+                ctx.url,
+                attempt
             );
 
             let result =
@@ -294,11 +299,11 @@ impl RetryMiddleware {
             };
 
             warn!(
-                method = %ctx.method,
-                url = %ctx.url,
+                "retrying request: method={}, url={}, attempt={}, wait_ms={}",
+                ctx.method,
+                ctx.url,
                 attempt,
-                wait_ms = wait.as_millis(),
-                "retrying request"
+                wait.as_millis()
             );
 
             tokio::time::sleep(wait).await;
