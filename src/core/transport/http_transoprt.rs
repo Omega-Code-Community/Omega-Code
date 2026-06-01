@@ -1,11 +1,16 @@
 use std::time::Duration;
+use std::pin::Pin;
 
+use futures_util::Stream;
 use tokio::time::sleep;
 use crate::core::transport::errors::TransportError;
 use crate::core::transport::request::TransportRequest;
 use crate::core::transport::response::TransportResponse;
 use crate::core::transport::retry::RetryPolicy;
+use crate::core::transport::sse::{SseStream, sse_stream_to_json};
 use crate::core::client::base_client::BaseClient;
+use serde::de::DeserializeOwned;
+
 #[derive(Clone)]
 pub struct HttpTransport {
     client: BaseClient,
@@ -99,5 +104,27 @@ impl HttpTransport {
 
     fn backoff(&self, retry: usize) -> Duration {
         self.retry.base_delay * retry as u32
+    }
+
+    pub async fn execute_stream<T>(
+        &self,
+        req: TransportRequest,
+    ) -> Result<Pin<Box<dyn Stream<Item = anyhow::Result<T>> + Send + 'static>>, TransportError>
+    where
+        T: DeserializeOwned + Send + 'static,
+    {
+        let request = self.build_request(req)?;
+        
+        let response = self.client.execute(request).await?;
+        
+        let status = response.status();
+        if status.is_client_error() || status.is_server_error() {
+            return Err(TransportError::Server(status.to_string()));
+        }
+
+        let sse_stream = SseStream::new(response);
+        let json_stream = sse_stream_to_json(sse_stream).await;
+        
+        Ok(json_stream)
     }
 }
