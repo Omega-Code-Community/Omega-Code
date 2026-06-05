@@ -27,7 +27,7 @@ rmcp = "1.7.0"
 rusqlite = { version = "0.40.0", features = ["bundled"] }
 ratatui = "0.30.0"
 crossterm = "0.29.0"
-log = "0.4.30"
+log = "0.4.32"
 flexi_logger = "0.31.9"
 chrono = "0.4.44"
 rust-i18n = "4.1.0"
