@@ -1,0 +1,137 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+
+  build:
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+
+          - os: ubuntu-latest
+            target_os: linux
+            arch: amd64
+            rust_target: x86_64-unknown-linux-gnu
+
+          - os: ubuntu-latest
+            target_os: linux
+            arch: arm64
+            rust_target: aarch64-unknown-linux-gnu
+
+          - os: windows-latest
+            target_os: windows
+            arch: x64
+            rust_target: x86_64-pc-windows-msvc
+
+          - os: windows-latest
+            target_os: windows
+            arch: arm64
+            rust_target: aarch64-pc-windows-msvc
+
+          - os: macos-13
+            target_os: macos
+            arch: x64
+            rust_target: x86_64-apple-darwin
+
+          - os: macos-14
+            target_os: macos
+            arch: arm64
+            rust_target: aarch64-apple-darwin
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y ruby ruby-dev rpm
+          sudo gem install fpm
+          cargo install cargo-cyclonedx || true
+
+      - name: Install Windows Dependencies
+        if: runner.os == 'Windows'
+        run: |
+          choco install nsis -y
+
+      - name: Build
+        shell: bash
+        run: |
+          chmod +x build.sh
+
+          export RUST_TARGET="${{ matrix.rust_target }}"
+
+          ./build.sh
+
+      - name: Package
+        shell: bash
+        run: |
+          chmod +x package.sh
+
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          ./package.sh \
+            "$VERSION" \
+            "${{ matrix.target_os }}" \
+            "${{ matrix.arch }}"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target_os }}-${{ matrix.arch }}
+          path: target/**
+
+  release:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/softprops/gh-release@v2
+        with:
+          files: artifacts/**/*
+
+      - name: Generate Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: artifacts/**/*
