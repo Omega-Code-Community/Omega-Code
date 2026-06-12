@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@dnd-kit/abstract": "^0.4.0",
+    "@dnd-kit/abstract": "^0.5.0",
     "@lucide/vue": "^1.17.0",
     "@tabler/icons-vue": "^3.44.0",
     "@tailwindcss/vite": "^4.3.0",
