@@ -12,7 +12,7 @@
     "@dnd-kit/abstract": "^0.4.0",
     "@lucide/vue": "^1.17.0",
     "@tabler/icons-vue": "^3.44.0",
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.1",
     "@tanstack/vue-table": "^8.21.3",
     "@unovis/ts": "^1.6.5",
     "@unovis/vue": "^1.6.5",
