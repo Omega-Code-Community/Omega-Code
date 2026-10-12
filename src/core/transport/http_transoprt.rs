@@ -127,4 +127,23 @@ impl HttpTransport {
         
         Ok(json_stream)
     }
+
+    /// 执行请求并返回原始 SSE 事件流，由调用方自行解析 `data` 字段。
+    /// 相比 [`HttpTransport::execute_stream`]，此方法不会将事件反序列化为 JSON，
+    /// 因此可以处理诸如 OpenAI 的 `data: [DONE]` 这类非 JSON 结束标记。
+    pub async fn execute_sse(
+        &self,
+        req: TransportRequest,
+    ) -> Result<SseStream, TransportError> {
+        let request = self.build_request(req)?;
+
+        let response = self.client.execute(request).await?;
+
+        let status = response.status();
+        if status.is_client_error() || status.is_server_error() {
+            return Err(TransportError::Server(status.to_string()));
+        }
+
+        Ok(SseStream::new(response))
+    }
 }
