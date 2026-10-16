@@ -2,21 +2,22 @@
 extern crate OmegaCode;
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate flexi_logger;
 
 use flexi_logger::{
-    Cleanup, Criterion, Duplicate, FileSpec, Logger, Naming, WriteMode, detailed_format,
+    Cleanup, Criterion, FileSpec, Logger, Naming, WriteMode, detailed_format,
 };
 
 fn main() {
     init_logger();
     if let Err(e) = OmegaCode::run() {
         error!("Application error: {}", e);
+        // CLI 子命令的错误需反馈到控制台（日志仅写文件），否则表现为静默 exit 1。
+        eprintln!("Error: {}", e);
         // Print full error chain
         let mut current = e.source();
         while let Some(cause) = current {
             error!("Caused by: {}", cause);
+            eprintln!("  caused by: {}", cause);
             current = cause.source();
         }
         std::process::exit(1);

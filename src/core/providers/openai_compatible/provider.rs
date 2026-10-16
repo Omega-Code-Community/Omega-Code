@@ -54,6 +54,21 @@ impl Provider for OpenAiCompatibleProvider {
         Ok(CompletionResponse::from(response))
     }
 
+    async fn list_models(&self) -> Result<Vec<String>> {
+        let mut headers = HashMap::new();
+        headers.insert("Authorization".to_string(), format!("Bearer {}", self.api_key));
+
+        let url = format!("{}/models", self.base_url);
+
+        let value: serde_json::Value = self
+            .client
+            .get_json(&url, headers, &HashMap::<String, String>::new())
+            .await
+            .map_err(|e| anyhow::anyhow!("OpenAI models API error: {}", e))?;
+
+        Ok(parse_model_ids(&value))
+    }
+
     async fn complete_stream(
         &self,
         mut request: CompletionRequest,
@@ -116,5 +131,45 @@ impl Provider for OpenAiCompatibleProvider {
         });
 
         Ok(Box::pin(stream))
+    }
+}
+
+/// 从 OpenAI 兼容 `/models` 响应（`{"data":[{"id":...}]}`）中提取模型标识。
+fn parse_model_ids(value: &serde_json::Value) -> Vec<String> {
+    value
+        .get("data")
+        .and_then(|d| d.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|item| item.get("id").and_then(|i| i.as_str()))
+                .map(|s| s.to_string())
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_model_ids;
+    use serde_json::json;
+
+    #[test]
+    fn extracts_ids_from_data_array() {
+        let value = json!({
+            "object": "list",
+            "data": [
+                {"id": "gpt-4o", "object": "model"},
+                {"id": "gpt-4o-mini", "object": "model"}
+            ]
+        });
+        assert_eq!(parse_model_ids(&value), vec!["gpt-4o", "gpt-4o-mini"]);
+    }
+
+    #[test]
+    fn missing_or_malformed_data_yields_empty() {
+        assert!(parse_model_ids(&json!({})).is_empty());
+        assert!(parse_model_ids(&json!({"data": "nope"})).is_empty());
+        // 缺少 id 字段的项被跳过。
+        assert!(parse_model_ids(&json!({"data": [{"object": "model"}]})).is_empty());
     }
 }

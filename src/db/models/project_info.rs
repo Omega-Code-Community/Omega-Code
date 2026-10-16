@@ -5,17 +5,29 @@ use rusqlite::{
     ToSql,
 };
 
+use super::parse_db_time;
 use crate::core::db::Model;
 
+/// 项目信息表（`project_info`）。
+///
+/// 对应《系统功能设计与数据库设计文档》四.13：以工作区绝对路径 `path` 唯一标识一个项目，
+/// 记录项目自身的时间信息（`create_at`/`updata_at`，字段名沿用设计文档拼写）与逻辑删除标记。
+/// 注意：`create_at`/`updata_at` 为项目业务时间，与审计字段 `create_time`/`update_time` 并存。
 #[derive(Clone, Debug)]
 pub struct ProjectInfo {
     pub id: i32,
+    /// 项目名称。
     pub name: String,
-    pub icon: String,
-    pub project_type: String,
-    pub status: i8, // default 1
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    /// 项目工作区绝对路径（唯一）。
+    pub path: String,
+    /// 项目创建时间（业务字段，字符串原样存储）。
+    pub create_at: Option<String>,
+    /// 项目更新时间（业务字段，字符串原样存储；字段名沿用设计文档拼写）。
+    pub updata_at: Option<String>,
+    /// 逻辑删除标记：0 正常 / 1 已删除。
+    pub is_deleted: i8,
+    pub create_time: DateTime<Utc>,
+    pub update_time: DateTime<Utc>,
     pub remark: Option<String>,
 }
 
@@ -29,58 +41,45 @@ impl Model for ProjectInfo {
         CREATE TABLE IF NOT EXISTS project_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            icon TEXT NOT NULL,
-            project_type TEXT NOT NULL,
-            status INTEGER NOT NULL DEFAULT 1,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            path TEXT NOT NULL,
+            create_at TEXT,
+            updata_at TEXT,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            create_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            update_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             remark TEXT
         )
         "#
     }
 
     fn from_row(row: &Row) -> RusqliteResult<Self> {
-        let created_at: String = row.get("created_at")?;
-        let updated_at: String = row.get("updated_at")?;
+        let create_time = parse_db_time(&row.get::<_, String>("create_time")?)?;
+        let update_time = parse_db_time(&row.get::<_, String>("update_time")?)?;
 
         Ok(Self {
             id: row.get("id")?,
             name: row.get("name")?,
-            icon: row.get("icon")?,
-            project_type: row.get("project_type")?,
-            status: row.get("status")?,
-            created_at: DateTime::parse_from_rfc3339(&created_at)
-                .map(|v| v.with_timezone(&Utc))
-                .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Text,
-                        Box::new(e),
-                    )
-                })?,
-            updated_at: DateTime::parse_from_rfc3339(&updated_at)
-                .map(|v| v.with_timezone(&Utc))
-                .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Text,
-                        Box::new(e),
-                    )
-                })?,
+            path: row.get("path")?,
+            create_at: row.get("create_at")?,
+            updata_at: row.get("updata_at")?,
+            is_deleted: row.get("is_deleted")?,
+            create_time,
+            update_time,
             remark: row.get("remark")?,
         })
     }
 
     fn insert_columns() -> &'static str {
-        "name, icon, project_type, status, remark"
+        "name, path, create_at, updata_at, is_deleted, remark"
     }
 
     fn insert_values(&self) -> Vec<Box<dyn ToSql>> {
         vec![
             Box::new(self.name.clone()),
-            Box::new(self.icon.clone()),
-            Box::new(self.project_type.clone()),
-            Box::new(self.status),
+            Box::new(self.path.clone()),
+            Box::new(self.create_at.clone()),
+            Box::new(self.updata_at.clone()),
+            Box::new(self.is_deleted),
             Box::new(self.remark.clone()),
         ]
     }
@@ -88,10 +87,11 @@ impl Model for ProjectInfo {
     fn update_set_clause(&self) -> String {
         r#"
         name = ?,
-        icon = ?,
-        project_type = ?,
-        status = ?,
-        updated_at = CURRENT_TIMESTAMP,
+        path = ?,
+        create_at = ?,
+        updata_at = ?,
+        is_deleted = ?,
+        update_time = CURRENT_TIMESTAMP,
         remark = ?
         "#
             .trim()
@@ -101,9 +101,10 @@ impl Model for ProjectInfo {
     fn update_values(&self) -> Vec<Box<dyn ToSql>> {
         vec![
             Box::new(self.name.clone()),
-            Box::new(self.icon.clone()),
-            Box::new(self.project_type.clone()),
-            Box::new(self.status),
+            Box::new(self.path.clone()),
+            Box::new(self.create_at.clone()),
+            Box::new(self.updata_at.clone()),
+            Box::new(self.is_deleted),
             Box::new(self.remark.clone()),
         ]
     }

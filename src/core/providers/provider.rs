@@ -12,6 +12,13 @@ pub trait Provider: Send + Sync {
 
     async fn complete(&self, request: CompletionRequest) -> Result<CompletionResponse>;
 
+    /// 拉取该供应商可用的模型标识列表（用于《设计文档》§3.4 模型自动同步）。
+    ///
+    /// 默认不支持；由具备模型清单接口的供应商（如 OpenAI 兼容、Ollama）覆盖实现。
+    async fn list_models(&self) -> Result<Vec<String>> {
+        anyhow::bail!("this provider does not support listing models")
+    }
+
     /// 流式补全。默认实现回退到 [`Provider::complete`]，
     /// 将完整结果作为单个增量片段发出；支持原生流式的供应商可覆盖此方法。
     async fn complete_stream(

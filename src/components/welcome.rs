@@ -1,4 +1,4 @@
-use ratatui_kit::{Component, ComponentDrawer, ComponentUpdater, Hooks, Props, UseEvents, UseFuture, UseState};
+use ratatui_kit::{Component, ComponentDrawer, ComponentUpdater, Hooks, Props, UseEvents, UseExit, UseFuture, UseRouter, UseState};
 
 use ratatui_kit::crossterm::event::{Event, KeyCode, KeyEventKind};
 
@@ -10,6 +10,7 @@ use ratatui_kit::ratatui::{
 use crate::runtime::download::DownloadProgress;
 use crate::runtime::extract::ExtractProgress;
 use crate::runtime::runtime::{ensure_jre, ensure_python};
+use crate::services::welcome as panel_service;
 
 #[derive(Props)]
 pub struct WelcomeProps {
@@ -37,6 +38,8 @@ pub struct Welcome {
     menu_style: Style,
     version: Option<String>,
     show_menu: bool,
+    /// 菜单模式下的状态提示（如打开控制台面板的结果）。
+    menu_message: String,
 
     jre_ready: bool,
     python_ready: bool,
@@ -61,6 +64,7 @@ impl Component for Welcome {
             menu_style: props.menu_style,
             version: props.version.clone(),
             show_menu: props.show_menu,
+            menu_message: String::new(),
 
             jre_ready: false,
             python_ready: false,
@@ -98,6 +102,12 @@ impl Component for Welcome {
         let mut speed = hooks.use_state(|| self.speed);
 
         let mut state_index = hooks.use_state(|| self.selected_index);
+        let menu_message = hooks.use_state(|| self.menu_message.clone());
+
+        // 导航与退出句柄：须在条件性 use_future 之前无条件获取，以保持钩子调用顺序稳定。
+        let mut navigate = hooks.use_navigate();
+        let mut exit = hooks.use_exit();
+
         hooks.use_events(move |event| {
             if jre_ready.get() && python_ready.get() {
                 if let Event::Key(key) = event {
@@ -119,9 +129,21 @@ impl Component for Welcome {
                         }
 
                         KeyCode::Enter => match state_index.get() {
-                            0 => todo!("打开配置"),
-                            1 => todo!("开启新项目"),
-                            2 => todo!("退出程序"),
+                            // 打开控制台面板：后台启动 java -jar 并在浏览器打开（缺 jar/JRE 时提示）。
+                            0 => {
+                                let mut msg = menu_message.clone();
+                                std::thread::spawn(move || {
+                                    let text = match panel_service::open_console_panel() {
+                                        Ok(outcome) => outcome.message(),
+                                        Err(e) => format!("cannot open console panel: {e}"),
+                                    };
+                                    msg.set(text);
+                                });
+                            }
+                            // 开启新项目：进入聊天页。
+                            1 => navigate.push("/chat"),
+                            // 退出程序。
+                            2 => exit(),
                             _ => {}
                         },
 
@@ -229,6 +251,7 @@ impl Component for Welcome {
         self.show_menu = jre_ready.get() && python_ready.get();
 
         self.selected_index = state_index.get();
+        self.menu_message = menu_message.read().clone();
 
         self.stage = stage.read().clone();
         self.percent = percent.get();
@@ -341,6 +364,14 @@ impl Component for Welcome {
                 lines.push(Line::from(Span::styled(
                     format!("{prefix}• {item}"),
                     style,
+                )));
+            }
+
+            if !self.menu_message.is_empty() {
+                lines.push(Line::from(""));
+                lines.push(Line::from(Span::styled(
+                    self.menu_message.clone(),
+                    self.style.add_modifier(Modifier::DIM),
                 )));
             }
         }

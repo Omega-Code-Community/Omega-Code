@@ -23,9 +23,10 @@ pub fn RouterPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
         }
     });
 
-    //todo 这里的逻辑是通过数据库查询是否初始化，从而确定要路由到 Welcome 还是 Chat
-    //todo 为了开发方便，这里的逻辑还需要判断是否是开发环境，如果是开发环境，默认路由到路由页面，路由页面在生产环境不对外暴露
-    //todo 同时路由函数禁止在生成环境中调用，避免在生产环境中路由到路由页面
+    // 本页为「开发调试路由页」：仅在开发环境（debug 构建或设置 OMEGA_DEV）作为入口，
+    // 由 `crate::router::initial_route()` 决定；生产环境入口直接为 /welcome 或 /chat，
+    // 永不进入本页，故下方 1/2/3 手动路由不对生产环境暴露
+    // （见《系统功能设计》路由约束：路由调试函数禁止在生产环境调用）。
 
     element!(
         View(height: Constraint::Length(10),) {

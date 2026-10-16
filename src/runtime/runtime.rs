@@ -21,6 +21,16 @@ pub struct RuntimePaths {
     pub python: PathBuf,
 }
 
+/// 同步探测已安装的 JRE `java` 可执行文件路径（不触发下载）。
+///
+/// 仅扫描 `~/.omega/runtime/jre/current`；未安装或找不到时返回 `None`。
+/// 供「打开控制台面板」等需要就地启动 Java 进程的场景使用。
+pub fn installed_java() -> Option<PathBuf> {
+    let runtime_root = get_app_runtime_dir().ok()?;
+    let current_dir = runtime_root.join("jre").join("current");
+    find_java_binary(&current_dir, current_platform().os).ok()
+}
+
 pub async fn ensure_jre<
     DF,
     EF,

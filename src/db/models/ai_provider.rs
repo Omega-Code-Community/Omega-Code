@@ -5,19 +5,30 @@ use rusqlite::{
     ToSql,
 };
 
+use super::parse_db_time;
 use crate::core::db::Model;
 
+/// AI 供应商表（`ai_provider`）。
+///
+/// 对应《系统功能设计与数据库设计文档》四.1：统一管理接入的 AI 厂商服务，
+/// 除 Ollama 外 API 地址硬编码预置，密钥隔离存储。
 #[derive(Clone, Debug)]
 pub struct AiProvider {
     pub id: i32,
+    /// 供应商名称，非空。
     pub name: String,
-    pub avatar: String,
+    /// 头像地址（图片 URL / 本地路径）。
+    pub avatar: Option<String>,
+    /// API 地址，非空。
     pub api: String,
+    /// API 密钥，可为空（Ollama 非强制）。
     pub key: Option<String>,
+    /// 请求超时时间，单位：秒，默认 30。
     pub timeout: i32,
+    /// 启用状态：0-禁用 1-启用。
     pub status: i8,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    pub create_time: DateTime<Utc>,
+    pub update_time: DateTime<Utc>,
     pub remark: Option<String>,
 }
 
@@ -31,22 +42,21 @@ impl Model for AiProvider {
         CREATE TABLE IF NOT EXISTS ai_provider (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            avatar TEXT NOT NULL,
+            avatar TEXT,
             api TEXT NOT NULL,
             key TEXT,
-            timeout INTEGER NOT NULL DEFAULT 5000,
+            timeout INTEGER NOT NULL DEFAULT 30,
             status INTEGER NOT NULL DEFAULT 1,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            create_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            update_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             remark TEXT
         )
         "#
     }
 
     fn from_row(row: &Row) -> RusqliteResult<Self> {
-        let created_at: String = row.get("created_at")?;
-
-        let updated_at: String = row.get("updated_at")?;
+        let create_time = parse_db_time(&row.get::<_, String>("create_time")?)?;
+        let update_time = parse_db_time(&row.get::<_, String>("update_time")?)?;
 
         Ok(Self {
             id: row.get("id")?,
@@ -56,24 +66,8 @@ impl Model for AiProvider {
             key: row.get("key")?,
             timeout: row.get("timeout")?,
             status: row.get("status")?,
-            created_at: DateTime::parse_from_rfc3339(&created_at)
-                .map(|v| v.with_timezone(&Utc))
-                .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Text,
-                        Box::new(e),
-                    )
-                })?,
-            updated_at: DateTime::parse_from_rfc3339(&updated_at)
-                .map(|v| v.with_timezone(&Utc))
-                .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Text,
-                        Box::new(e),
-                    )
-                })?,
+            create_time,
+            update_time,
             remark: row.get("remark")?,
         })
     }
@@ -102,7 +96,7 @@ impl Model for AiProvider {
         key = ?,
         timeout = ?,
         status = ?,
-        updated_at = CURRENT_TIMESTAMP,
+        update_time = CURRENT_TIMESTAMP,
         remark = ?
         "#
             .trim()
