@@ -14,18 +14,23 @@ pub fn RouterPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
         if let Event::Key(key_event) = event {
             if key_event.kind == KeyEventKind::Press {
                 match key_event.code {
-                    KeyCode::Char('1') => navigate.push("/welcome"),
-                    KeyCode::Char('2') => navigate.push("/chat"),
-                    KeyCode::Char('3') => navigate.push("/router"),
+                    // 用 replace 而非 push：ratatui-kit 0.5.9 的 RouterHistory::push 在
+                    // 历史长度达到 max_length 后会 pop_front 却不同步回退 current，
+                    // 导致 insert(current) 越界 panic（index out of bounds）。
+                    // 调试路由页只需切换当前页，replace 不增长历史栈，天然规避该缺陷。
+                    KeyCode::Char('1') => navigate.replace("/welcome"),
+                    KeyCode::Char('2') => navigate.replace("/chat"),
+                    KeyCode::Char('3') => navigate.replace("/router"),
                     _ => {}
                 }
             }
         }
     });
 
-    //todo 这里的逻辑是通过数据库查询是否初始化，从而确定要路由到 Welcome 还是 Chat
-    //todo 为了开发方便，这里的逻辑还需要判断是否是开发环境，如果是开发环境，默认路由到路由页面，路由页面在生产环境不对外暴露
-    //todo 同时路由函数禁止在生成环境中调用，避免在生产环境中路由到路由页面
+    // 本页为「开发调试路由页」：仅在开发环境（debug 构建或设置 OMEGA_DEV）作为入口，
+    // 由 `crate::router::initial_route()` 决定；生产环境入口直接为 /welcome 或 /chat，
+    // 永不进入本页，故下方 1/2/3 手动路由不对生产环境暴露
+    // （见《系统功能设计》路由约束：路由调试函数禁止在生产环境调用）。
 
     element!(
         View(height: Constraint::Length(10),) {

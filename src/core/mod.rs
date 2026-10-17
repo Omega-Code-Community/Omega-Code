@@ -1,9 +1,15 @@
 pub mod transport;
 pub mod tools;
+pub mod mcp;
 pub mod config;
 pub mod runtime;
 pub mod db;
 pub mod agent;
-mod providers;
+pub mod arena;
+pub mod memory;
+pub mod project;
+pub mod prompt;
+pub mod scheduler;
+pub mod providers;
+pub mod client;
 mod errors;
-mod client;

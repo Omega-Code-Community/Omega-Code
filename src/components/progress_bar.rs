@@ -1,10 +1,12 @@
 use ratatui_kit::prelude::*;
 use ratatui_kit::ratatui::{
     style::{Modifier, Style},
-    text::{Line, Span},
+    text::Span,
 };
 use ratatui_kit::ratatui::layout::Direction;
 
+// 预留：进度条组件属性。当前 Welcome 组件内联渲染安装进度条，ProgressBar 尚未接入，故允许未构造。
+#[allow(dead_code)]
 #[derive(Debug, Clone, Props)]
 pub struct ProgressBarProps {
     pub style: Style,

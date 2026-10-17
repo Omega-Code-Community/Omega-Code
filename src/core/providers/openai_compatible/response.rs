@@ -7,6 +7,26 @@ pub struct OpenAiResponse {
     pub usage: Option<OpenAiUsage>,
 }
 
+/// OpenAI 兼容流式响应块（SSE `data` 负载）。
+#[derive(Deserialize)]
+pub struct OpenAiStreamChunk {
+    #[serde(default)]
+    pub choices: Vec<OpenAiStreamChoice>,
+}
+
+#[derive(Deserialize)]
+pub struct OpenAiStreamChoice {
+    #[serde(default)]
+    pub delta: OpenAiStreamDelta,
+    pub finish_reason: Option<String>,
+}
+
+#[derive(Default, Deserialize)]
+pub struct OpenAiStreamDelta {
+    #[serde(default)]
+    pub content: Option<String>,
+}
+
 #[derive(Deserialize)]
 pub struct OpenAiChoice {
     pub message: OpenAiAssistantMessage,

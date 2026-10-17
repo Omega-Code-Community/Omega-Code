@@ -5,22 +5,36 @@ use rusqlite::{
     ToSql,
 };
 
+use super::parse_db_time;
 use crate::core::db::Model;
 
+/// LLM 模型表（`llm_model`）。
+///
+/// 对应《系统功能设计与数据库设计文档》四.2：模型为公共基座能力，无独立运行参数，
+/// 个性化配置（温度、上下文限制等）由 Agent 独立配置。`model_code` 逻辑唯一。
 #[derive(Clone, Debug)]
 pub struct LLMModel {
     pub id: i32,
+    /// 供应商 ID，关联 `ai_provider.id` 逻辑外键。
     pub provider_id: i32,
-    pub name: Option<String>,
-    pub avatar: String,
+    /// 头像地址（图片 URL / 本地路径）。
+    pub avatar: Option<String>,
+    /// 模型名称，非空。
+    pub name: String,
+    /// 模型标识，接口调用唯一标识，非空、逻辑唯一。
     pub model_code: String,
-    pub max_tokens: i32, // default 0
-    pub max_response_tokens: i32, // default 0
-    pub weight: i32, // default 0
-    pub call_count: i64, // default 0
-    pub status: i8, // default 1
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    /// 最大上下文（最大输入 token）。
+    pub max_tokens: i32,
+    /// 单次输出上限（单次生成最大 token）。
+    pub max_response_tokens: i32,
+    /// 负载分发权重。
+    pub weight: i32,
+    /// 累计调用次数。
+    pub call_count: i64,
+    /// 启用状态：0-禁用 1-启用。
+    pub status: i8,
+    pub create_time: DateTime<Utc>,
+    pub update_time: DateTime<Utc>,
     pub remark: Option<String>,
 }
 
@@ -34,67 +48,51 @@ impl Model for LLMModel {
         CREATE TABLE IF NOT EXISTS llm_model (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             provider_id INTEGER NOT NULL,
-            name TEXT,
-            avatar TEXT NOT NULL,
+            avatar TEXT,
+            name TEXT NOT NULL,
             model_code TEXT NOT NULL,
             max_tokens INTEGER NOT NULL DEFAULT 0,
             max_response_tokens INTEGER NOT NULL DEFAULT 0,
             weight INTEGER NOT NULL DEFAULT 0,
             call_count INTEGER NOT NULL DEFAULT 0,
             status INTEGER NOT NULL DEFAULT 1,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            create_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            update_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             remark TEXT
         )
         "#
     }
 
     fn from_row(row: &Row) -> RusqliteResult<Self> {
-        let created_at: String = row.get("created_at")?;
-        let updated_at: String = row.get("updated_at")?;
+        let create_time = parse_db_time(&row.get::<_, String>("create_time")?)?;
+        let update_time = parse_db_time(&row.get::<_, String>("update_time")?)?;
 
         Ok(Self {
             id: row.get("id")?,
             provider_id: row.get("provider_id")?,
-            name: row.get("name")?,
             avatar: row.get("avatar")?,
+            name: row.get("name")?,
             model_code: row.get("model_code")?,
             max_tokens: row.get("max_tokens")?,
             max_response_tokens: row.get("max_response_tokens")?,
             weight: row.get("weight")?,
             call_count: row.get("call_count")?,
             status: row.get("status")?,
-            created_at: DateTime::parse_from_rfc3339(&created_at)
-                .map(|v| v.with_timezone(&Utc))
-                .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Text,
-                        Box::new(e),
-                    )
-                })?,
-            updated_at: DateTime::parse_from_rfc3339(&updated_at)
-                .map(|v| v.with_timezone(&Utc))
-                .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Text,
-                        Box::new(e),
-                    )
-                })?,
+            create_time,
+            update_time,
             remark: row.get("remark")?,
         })
     }
 
     fn insert_columns() -> &'static str {
-        "provider_id, name, avatar, model_code, max_tokens, max_response_tokens, weight, call_count, status, remark"
+        "provider_id, avatar, name, model_code, max_tokens, max_response_tokens, weight, call_count, status, remark"
     }
 
     fn insert_values(&self) -> Vec<Box<dyn ToSql>> {
         vec![
             Box::new(self.provider_id),
-            Box::new(self.name.clone()),
             Box::new(self.avatar.clone()),
+            Box::new(self.name.clone()),
             Box::new(self.model_code.clone()),
             Box::new(self.max_tokens),
             Box::new(self.max_response_tokens),
@@ -108,15 +106,15 @@ impl Model for LLMModel {
     fn update_set_clause(&self) -> String {
         r#"
         provider_id = ?,
-        name = ?,
         avatar = ?,
+        name = ?,
         model_code = ?,
         max_tokens = ?,
         max_response_tokens = ?,
         weight = ?,
         call_count = ?,
         status = ?,
-        updated_at = CURRENT_TIMESTAMP,
+        update_time = CURRENT_TIMESTAMP,
         remark = ?
         "#
             .trim()
@@ -126,8 +124,8 @@ impl Model for LLMModel {
     fn update_values(&self) -> Vec<Box<dyn ToSql>> {
         vec![
             Box::new(self.provider_id),
-            Box::new(self.name.clone()),
             Box::new(self.avatar.clone()),
+            Box::new(self.name.clone()),
             Box::new(self.model_code.clone()),
             Box::new(self.max_tokens),
             Box::new(self.max_response_tokens),

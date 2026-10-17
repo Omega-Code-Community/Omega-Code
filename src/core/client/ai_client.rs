@@ -10,6 +10,7 @@ use crate::core::client::base_client::BaseClient;
 use crate::core::client::config::ClientConfig;
 use crate::core::transport::http_transoprt::HttpTransport;
 use crate::core::transport::retry::RetryPolicy;
+use crate::core::transport::sse::SseStream;
 use crate::core::transport::TransportRequest;
 
 #[derive(Clone)]
@@ -105,5 +106,29 @@ impl AiClient {
 
     pub fn transport(&self) -> &HttpTransport {
         &self.transport
+    }
+
+    /// 发送 POST 请求并返回原始 SSE 事件流，供需要自定义解析
+    /// （如处理 `data: [DONE]` 结束标记）的供应商使用。
+    pub async fn post_sse(
+        &self,
+        url: &str,
+        headers: HashMap<String, String>,
+        body: &impl Serialize,
+    ) -> Result<SseStream> {
+        let body_bytes = serde_json::to_vec(body)
+            .map_err(|e| anyhow!("Failed to serialize request body: {}", e))?;
+
+        let request = TransportRequest {
+            method: Method::POST,
+            url: url.to_string(),
+            headers,
+            body: Some(Bytes::from(body_bytes)),
+        };
+
+        self.transport
+            .execute_sse(request)
+            .await
+            .map_err(|e| anyhow!(e))
     }
 }

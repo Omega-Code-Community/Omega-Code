@@ -1,6 +1,23 @@
 // core/types.rs
 
+use std::pin::Pin;
+
+use anyhow::Result;
+use futures_util::Stream;
 use serde::{Deserialize, Serialize};
+
+/// 流式补全的增量片段。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StreamDelta {
+    /// 本次增量的文本内容（可能为空）。
+    pub content: String,
+    /// 若本片段是最后一个，则携带结束原因。
+    pub finish_reason: Option<FinishReason>,
+}
+
+/// 流式补全返回的事件流类型别名。
+pub type CompletionStream =
+    Pin<Box<dyn Stream<Item = Result<StreamDelta>> + Send + 'static>>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -1,6 +1,7 @@
-use crate::core::providers::config::{ProviderConfig, ProviderKind};
-use crate::core::providers::provider::Provider;
-pub use types::{CompletionRequest, CompletionResponse, Message, Role, FinishReason, Usage};
+pub use types::{CompletionRequest, CompletionResponse, CompletionStream, Message, Role, FinishReason, StreamDelta, Usage};
+
+pub use config::{ProviderConfig, ProviderKind};
+pub use provider::Provider;
 
 mod types;
 mod provider;

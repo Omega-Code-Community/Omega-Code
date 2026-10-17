@@ -2,7 +2,7 @@ use crate::utils;
 
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
     Frame, DefaultTerminal,
@@ -165,13 +165,4 @@ impl App {
         ));
         frame.render_widget(prompt, area);
     }
-}
-
-// 标准主函数（极简、规范）
-fn main() -> anyhow::Result<()> {
-    let mut terminal = ratatui::init();
-    let mut app = App::default();
-    let result = app.run(&mut terminal);
-    ratatui::restore();
-    result
 }

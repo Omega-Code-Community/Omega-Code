@@ -9,7 +9,7 @@ pub use ai_client::AiClient;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use futures_util::stream::Stream;
-use rand::{Rng, RngExt};
+use rand::RngExt;
 use reqwest::{
     multipart,
     Client,
