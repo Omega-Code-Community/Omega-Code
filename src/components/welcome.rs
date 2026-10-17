@@ -83,23 +83,30 @@ impl Component for Welcome {
         &mut self,
         props: &mut Self::Props<'_>,
         mut hooks: Hooks,
-        _updater: &mut ComponentUpdater,
+        updater: &mut ComponentUpdater,
     ) {
+        // 手写 `impl Component`（非 `#[component]` 宏）不会自动注入上下文栈：
+        // 宏生成的 `update` 会先执行 `hooks.with_context_stack(updater.component_context_stack())`，
+        // 而此处 `hooks` 由框架构造时 `context` 为 `None`。若不手动挂载即调用
+        // `use_navigate`/`use_exit`/`use_context*` 等依赖上下文的钩子，会触发
+        // `use_context.rs` 的 "context not available" 崩溃。故在任何钩子调用前先挂载上下文栈。
+        let mut hooks = hooks.with_context_stack(updater.component_context_stack());
+
         self.style = props.style;
         self.menu_style = props.menu_style;
         self.version = props.version.clone();
 
-        let mut jre_ready = hooks.use_state(|| self.jre_ready);
-        let mut python_ready = hooks.use_state(|| self.python_ready);
-        let mut is_installing = hooks.use_state(|| self.is_installing);
-        let mut install_message = hooks.use_state(|| self.install_message.clone());
+        let jre_ready = hooks.use_state(|| self.jre_ready);
+        let python_ready = hooks.use_state(|| self.python_ready);
+        let is_installing = hooks.use_state(|| self.is_installing);
+        let install_message = hooks.use_state(|| self.install_message.clone());
         let mut install_started = hooks.use_state(|| false);
 
-        let mut stage = hooks.use_state(|| self.stage.clone());
-        let mut percent = hooks.use_state(|| self.percent);
-        let mut downloaded = hooks.use_state(|| self.downloaded);
-        let mut total = hooks.use_state(|| self.total);
-        let mut speed = hooks.use_state(|| self.speed);
+        let stage = hooks.use_state(|| self.stage.clone());
+        let percent = hooks.use_state(|| self.percent);
+        let downloaded = hooks.use_state(|| self.downloaded);
+        let total = hooks.use_state(|| self.total);
+        let speed = hooks.use_state(|| self.speed);
 
         let mut state_index = hooks.use_state(|| self.selected_index);
         let menu_message = hooks.use_state(|| self.menu_message.clone());
@@ -140,8 +147,8 @@ impl Component for Welcome {
                                     msg.set(text);
                                 });
                             }
-                            // 开启新项目：进入聊天页。
-                            1 => navigate.push("/chat"),
+                            // 开启新项目：进入聊天页（replace 不增长历史栈，规避 RouterHistory::push 越界缺陷）。
+                            1 => navigate.replace("/chat"),
                             // 退出程序。
                             2 => exit(),
                             _ => {}

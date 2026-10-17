@@ -14,9 +14,13 @@ pub fn RouterPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
         if let Event::Key(key_event) = event {
             if key_event.kind == KeyEventKind::Press {
                 match key_event.code {
-                    KeyCode::Char('1') => navigate.push("/welcome"),
-                    KeyCode::Char('2') => navigate.push("/chat"),
-                    KeyCode::Char('3') => navigate.push("/router"),
+                    // 用 replace 而非 push：ratatui-kit 0.5.9 的 RouterHistory::push 在
+                    // 历史长度达到 max_length 后会 pop_front 却不同步回退 current，
+                    // 导致 insert(current) 越界 panic（index out of bounds）。
+                    // 调试路由页只需切换当前页，replace 不增长历史栈，天然规避该缺陷。
+                    KeyCode::Char('1') => navigate.replace("/welcome"),
+                    KeyCode::Char('2') => navigate.replace("/chat"),
+                    KeyCode::Char('3') => navigate.replace("/router"),
                     _ => {}
                 }
             }

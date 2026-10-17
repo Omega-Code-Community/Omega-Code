@@ -1,5 +1,7 @@
 use futures_util::StreamExt;
 
+// 预留：SSE 原始字节流调试打印。当前流式响应由 AiClient::post_sse 处理，此函数尚未接入。
+#[allow(dead_code)]
 pub async fn read_sse(
     response: reqwest::Response,
 ) -> anyhow::Result<()> {

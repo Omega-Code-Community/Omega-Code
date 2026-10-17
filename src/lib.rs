@@ -1,13 +1,10 @@
 #[macro_use]
 extern crate rust_i18n;
 
-use crate::pages::layout::App;
 use log::{error, info};
-use ratatui_kit::crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui_kit::prelude::RouterProvider;
-use ratatui_kit::{AnyElement, ElementExt, Hooks, UseEvents, UseRouter, component, element};
+use ratatui_kit::{AnyElement, ElementExt, Hooks, component, element};
 use rust_i18n::t;
-use std::io;
 
 pub mod components;
 pub mod core;

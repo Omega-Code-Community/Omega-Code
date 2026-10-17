@@ -6,6 +6,11 @@ edition = "2024"
 [lib]
 path = "src/lib.rs"
 
+# crate/bin 名沿用产品名 `OmegaCode`（大写驼峰），与可执行文件名保持一致；
+# 显式关闭 non_snake_case 以抑制“crate 名应为 snake case”警告。
+[lints.rust]
+non_snake_case = "allow"
+
 [[bin]]
 name = "OmegaCode"
 path = "src/main.rs"

@@ -4,13 +4,12 @@ use ratatui_kit::{
     ComponentUpdater,
     Hooks,
     Props,
-    UseState,
 };
 
 use ratatui_kit::ratatui::{
     style::{Color, Style, Stylize},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph, Widget},
+    widgets::{Paragraph, Widget},
     layout::{Alignment, Rect},
     buffer::Buffer,
 };
@@ -100,9 +99,9 @@ impl StatusBar {
     fn render_border_top(&self, buf: &mut Buffer, area: Rect) {
         if area.height > 0 {
             for x in area.left()..area.right() {
-                buf.get_mut(x, area.top())
-                    .set_char('─')
-                    .set_style(self.border_style);
+                if let Some(cell) = buf.cell_mut((x, area.top())) {
+                    cell.set_char('─').set_style(self.border_style);
+                }
             }
         }
     }
@@ -123,7 +122,7 @@ impl StatusBar {
     }
 
     /// 创建内容行，包含左侧路径和右侧进度条
-    fn create_content_line(&self, total_width: usize) -> Line {
+    fn create_content_line(&self, total_width: usize) -> Line<'_> {
         let mut spans = Vec::new();
 
         // 计算左右两部分的最大宽度
@@ -149,7 +148,6 @@ impl StatusBar {
 
         // 为右侧进度条预留空间
         let progress_bar_width = std::cmp::min(right_max_width, 20); // 最大20字符宽的进度条
-        let required_space = progress_bar_width + 3; // 加上一些间隔
         let available_middle_space = total_width.saturating_sub(current_path_width + progress_bar_width);
 
         // 添加中间空白
@@ -187,7 +185,7 @@ impl StatusBar {
     }
 
     /// 创建上下文长度进度条
-    fn create_progress_bar(&self, max_width: usize) -> Vec<Span> {
+    fn create_progress_bar(&self, max_width: usize) -> Vec<Span<'_>> {
         let mut spans = Vec::new();
 
         if self.max_context_length == 0 {
